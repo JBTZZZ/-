@@ -1,86 +1,86 @@
 /**
  * =========================================================
- * 多源融合增强版 Cloudflare Worker
- * - SinParty T4 + M3U
- * - HC 聚合 T4 + M3U
- * - TT 抖音直播 M3U
- * - CB 国外直播 M3U (api4)
- * - CB2 国外直播 M3U (api2)
- * - CB5 全球直播 M3U (api5)
- * - CB 分类频道 M3U (按地区/体型/主题分类)
+ * 云 云 云 多躯融吻催强 工作
+ - SinParty T4 + M3U
+ - HC T4 + M3U
+ * - TT M3U 技术 抖音直播
+ * - CB M3U( 国外直播 4 )
+ * - CB2 M3U( 国外直播 )
+ * - CB5 M3U( 全球直播)
+ * - CB ㈆类频道 M3U(按地区区/乌内立/)
  * =========================================================
  *
- * 融合自: JBTZZZ/- 双源版 + 四源增强版
- * 增强: 新增 TT/CB/CB2/CB5 源，启用 CB 分类频道，按源类型分类
+ * 融吻自:JBTZZ/- 双源版 + ;
+ * 星诺: 新山 TT/CB/CB2/CB5, 分用 CB 分频道
  *
  * TVBox:
  * {
- *   "key": "merged_live",
- *   "name": "多源直播",
- *   "type": 4,
- *   "api": "https://你的Worker域名.workers.dev/",
- *   "filterable": 1
+ 键:“合并”
+ * 名称:“多源直塞”
+ * “类型”:4
+ "API:"https://住盂.worker.workers.devem/,"
+ 可过滤的:1
  * }
  *
  * M3U:
- * https://你的Worker域名.workers.dev/live.m3u
+ * https://住的Worker.workers.devem/live.m3u
  * =========================================================
  */
 
-// ===================== 配置 =====================
-const CONFIG_MODE = "filter"; // "filter" 或 "flat"
+// ===========================================================================================================================================
+CONFIG_MODE阴谋  = 为 加来美� ;/后来美国 ; / 滤网 和
 
-// ===================== 源地址 =====================
-const SP_HOST = "https://sinparty.com";
-const SP_API_HOST = "https://api.sinparty.com";
-const HC_HOST = "http://api.hclyz.com:81/mf";
-const TT_HOST = "http://tiktok.xvideos4.tk/?otc=m3u";
-const CB_HOST = "https://chaturbate.xvideos4.tk/api4.php?live.m3u";
-const CB2_HOST = "https://chaturbate.xvideos4.tk/api2.php?otc=m3u";
-const CB5_HOST = "https://chaturbate.xvideos4.tk/api5.php?m3u&all";
-const CB_CAT_BASE = "https://chaturbate.xvideos4.tk/?otc=";
+//============================================================================================================================================
+SP_HOST · 阴谋 = https:/sinparty.com;  = https:/sinparty.com;
+SP_API_HOST - https://api.sinparty.com;  = https://api.sinparty.com;
+阴谋 HC_HOST = http://api.hclyz.com:81/mf;
+阴谋 TT_HOST = http://tiktok.xvideos4.tk/?otc=m3u;TT_HOST = "http://tiktok.xvideos4.tk/?otc=m3u";
+CB_HOST = https://chaturbate.xvideos4.tk/api4.php?live.m3u;CB_HOST = “https://chaturbate.xvideos4.tk/api4.php?live.m3u”;CB_HOST = https://chaturbate.xvideos4.tk/api4.php?live.m3u;CB_HOST = “https://chaturbate.xvideos4.tk/api4.php?live.m3u”;
+阴谋 CB2主播 = https://chaturbate.xvideos4.tk/api2.php?otc=m3u;CB2_HOST = "https://chaturbate.xvideos4.tk/api2.php?otc=m3u";
+阴谋 CB5_HOST = https://chaturbate.xvideos4.tk/api5.php?m3u&all;CB5_HOST = “https://chaturbate.xvideos4.tk/api5.php?m3u&all”; = https://chaturbate.xvideos4.tk/api5.php?m3u&all;CB5_HOST = “https://chaturbate.xvideos4.tk/api5.php?m3u&all”;
+阴谋 CB_CAT_BASE = https://chaturbate.xvideos4.tk/?otc=);CB_CAT_BASE = “https://chaturbate.xvideos4.tk/?otc=”; = https://chaturbate.xvideos4.tk/?otc=);CB_CAT_BASE = “https://chaturbate.xvideos4.tk/?otc=”;
 
-// ===================== 通用常量 =====================
-const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
-const LIVE_PIC = "https://raw.githubusercontent.com/fish2018/lib/refs/heads/main/imgs/live.png";
+//===========================================================================================================================================
+UA = 莫兹拉/北禾 罗璔拉/北禾达 俔о18万日春槔时 Windows NT 10.0;×64x64x64AppleWebKit/KHTMLHTML,二、中和韶和А� Chrome/120.0.0.0 Safari/537.36;UA = Mozilla/5.0(Windows NT 10.0;Win64;x64)HTML,串联壁类分) Chrome/120.0.0.0 Safari/537.36;UA = 莫兹拉/北达科万日大时 Windows Windows NT 10.0;Win64;x64x64AppleWebKit/KHTMLKHTMLKHTMLKHTML,一吉柯丁吉 Chrome/120.0.0.0 Safari/537.36”; UA = Mozilla/5.0(Windows NT 10.0;Win64;x64) AppleWebKit/537.36(KHTML,与Gecko类似) Chrome/120.0.0.0 Safari/537.36;
+阴谋 阴谋 属时 = https://raw.githubusercontent.com/fish2018/lib/refs/heads/main/imgs/live.png;LIVE_PIC= https://raw.githubusercontent.com/fish2018/lib/refs/heads/main/imgs/live.png = https://raw.githubusercontent.com/fish2018/lib/refs/heads/main/imgs/live.png;LIVE_PIC = "https://raw.githubusercontent.com/fish2018/lib/refs/heads/main/imgs/live.png";
 
-const SP_HEADERS = {
-    "User-Agent": UA,
-    "Accept": "application/json, text/plain, */*",
-    "Referer": SP_HOST + "/",
-    "Origin": SP_HOST
+阴谋 SP_EADERS = SP_EADERS = = SP_EADERS = {
+    用 票代码:用户代方:UA,用 调代码:用户代理UA: UA,
+    接:转 转用薪源/去 转用源/文化什,**转会: 流耗程序/老文朾本 表文/*接:转 转用程源/任,文民/任,**接受: 应用程序/内容、文本/表卡、*/*,
+    生:SP_HOST + 学报 厂荐人万人人溨荐人 +/原:SP_HOST + 原荐人_主持人推荐人SP_HOST +/",
+    生根:SP_HOST原:起源SP_HOST: SP_HOST
 };
-const HC_HEADERS = { "User-Agent": UA };
+阴谋 黑 · 御 · 御基 · · · 御撒丁 · · · · · · · · · · 赫兹 · · · 赫兹 · · · · · · 赫兹·比 耶··比 基德 = 转罗 = { 用户-:UA } HC_HEADERS =代理人用户-: UA };代理人
 
-// ===================== SP 分类定义 =====================
-const SP_NATIVE_CATEGORIES = [
-    { "type_id": "sp_all", "type_name": "✨ SP精选" },
-    { "type_id": "sp_girls", "type_name": "👩 SP女生" },
-    { "type_id": "sp_guys", "type_name": "👨 SP男生" },
-    { "type_id": "sp_couples", "type_name": "👩‍❤️‍👨 SP情侣" },
-    { "type_id": "sp_trans", "type_name": "🏳️‍⚧️ SP变性人" }
+//===========================================================================================================================================
+阴谋 SP_NATIVE_CATEGORIE = [SP_NATIVE_CATEGORIE = [ = [ SP_NATIVE_CATEGORIE = [
+    { type_id:sp_alltype_name:" ✨ SP{ type_id:"sp_all,type_name: ✨ SP}{ type_id:sp_alltype_name":" ✨ SP{ type_id: "sp_all, type_name: ✨ SP },
+    { type_id:type_namesp_girls:“👩 SP }{ type_id”:“sp_girls type_name:👩 SP}{ type_id: type_namesp_girls": "👩 SP }{ type_id": "sp_girls type_name: 👩 SP },
+    { type_id:“sp_guys,”“type_name👨👨SP$OL”}{ "type_id": "sp_guys, type_name: 👨 SP}{ type_id: "sp_guys, ""type_name👨 SP$OL"}{ "type_id": "sp_guys, type_name: 👨 SP },
+    { type_id: "sp_coupls, ""type_name"": 👩 ❤️ 👨 SP}{ type_idsp_coupes type_name: 👩 ❤️ 👨 SP}{ type_id: "sp_coupls, ""type_name":" 👩 ❤️ 👨 SP}{ type_idsp_couples type_name: 👩 ❤️ 👨 SP },
+    { type_id:sp_trans,type_name:🚧️ SP 与 与窨_id:–sp_trans type_name:🏳️ ⚧️ SP}{ type_id:sp_trans,type_name:🚧️ SP 丁窨_id:“sp_trans type_name: 🏳️ ⚧️ SP }
 ];
 
-const SP_NATIVE_FILTERS = {
-    "sp_all": [{ "key": "cat", "name": "排序", "value": [
-        { "n": "全部", "v": "" }, { "n": "热门推荐", "v": "trending" },
-        { "n": "近期新人", "v": "new" }, { "n": "私人节目", "v": "status_private" }
+SP_NATIVE_FILTERS = SP_NATIVE_FILTERS = SP_NATIVE_FILTERS = SP_NATIVE_FILTERS = {
+    sp_all:[{ 钥匙:“猫”“或中舗”通牒明“”“”“sp_all”:[{“键”:“cat”、“name”、“风度”、“值”:[sp_all:[{ 钥匙:“猫”“名字”通牒星“”“数值”:"sp_all": [{ "key": "cat", "name": "排序", "value": [
+        “n”:“八”“n”:“n”、“v”:“中太”“v”:“n”,{“n”:“#”,“v”,“趋势”}“n”“n”:“八郎”“n”:“n”,“v”:“一夫” "v": "" }, { "n": "热门推荐", "v": "trending" },
+        { “n”:“‘‘v’:风 },’”“n”“n”:“n”、“v”:“新” },{“n”:“n”、“v”:status_private{ “n”:“”““v”:风 },“n”“n”:私 一{ "n": "近期新人", "v": "new" }, { "n": "私人节目", "v": "status_private" }
     ]}],
-    "sp_girls": [{ "key": "cat", "name": "标签", "value": [
-        { "n": "全部", "v": "" }, { "n": "亚洲", "v": "asian" },
-        { "n": "成熟", "v": "mature" }, { "n": "大胸", "v": "big_boobs" }, { "n": "视角", "v": "pov" }
+    sp_girls:[{ 钥匙:“猫”“转”“砇语”“砇语”:“sp_girls”:[{“键”:“cat”、“name”、“U值”:"sp_girls:[{ 钥匙:“猫”“名字”“砇语”、“值”:"sp_girls": [{ "key": "cat", "name": "标签", "value": [
+        “n”:“八郎”“人” 数, 数,三、式钌,“n”:“我的”:“v”:“n”,{“n”:“五,”“n”“n”:“八郎”“二,�数,二、式二、式 "n": "全部", "v": "" }, { "n": "亚洲", "v": "asian" },
+        “n”“n”:“大白砰”,“v”:“n”“big_boobs”}、“n”:“v”{“n” "v": "tature" }, { "n":"""""""""v":"pov" }“n”“n”:“大约”,“v”:成熟成熟,“n”“n”:“大烸” “big_boobs”},{“n”:“v”{ "n"成熟 "v": "mature" }, { "n": "大胸", "v": "big_boobs" }, { "n": "视角", "v": "pov" }
     ]}],
-    "sp_guys": [{ "key": "cat", "name": "标签", "value": [
-        { "n": "全部", "v": "" }, { "n": "肌肉", "v": "muscular" },
-        { "n": "亚洲男", "v": "asian" }, { "n": "熊系", "v": "bear" }, { "n": "少年", "v": "twink" }
+    sp_guys:[{ 钥匙:“猫”“或三”“砇语”:“sp_guys”:[{“key”:“cat”、“name”:“U值”:[sp_guys:[{ 钥匙:“猫”“名字”“砇语”、“值”:"sp_guys": [{ "key": "cat", "name": "标签", "value": [
+        “n”:/“v”、“”“”“”“”“”“”“”“”“”“”“”“”“#”,“v”:“”“”,“n”:“”“”{ "n":"/"v,""""""""""""""""""""""""""""{ "n": "全部", "v": "" }, { "n": "肌肉", "v": "muscular" },
+        { "n":"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""‘‘‘‘‘‘’‘‘‘‘‘‘‘’’’‘‘‘‘’’‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘’’’’’’’’’’‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘’’’’’‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘’’’’’’’’’′′’′′’′′‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘’’’’’’’’’’’’′′′′’′′′′′′′′′′′′′′′′′′′′′′′′′′′′′′′′′′′′′′′′′′′′"""v"","""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""{ "n":""二崺 ""v"":""“”“”“”“”“”“”“”“”“”“”“”“”“”“”“”“”“”“”“”“”“”“”“”“”“”“”“”“”“‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘ "v": "asian" }, { "n": "熊系", "v": "bear" }, { "n": "少年", "v": "twink" }
     ]}],
-    "sp_trans": [{ "key": "cat", "name": "标签", "value": [
-        { "n": "全部", "v": "" }, { "n": "成熟", "v": "mature" }, { "n": "青少年", "v": "teen" }
+    sp_trans:[{ 钥匙,那”“”“猫”“将” strans:[{ “key”:“猕s”,“name”:“U值”:[sp_trans:[{ 钥匙:"那“价值”:"“猫”“名字”sp_trans": [{ "key": "猫", "name": "标签", "value": [
+        “n”、“n”、“v”、“n”、{“n”、{“n”、“v”:“v”:“v”:“v”、“n”、“v”、“v”、“v”}“n”“n”:“n”,“v”,{“n”.:成熟},{“n”:靝合,“v”:青少年{ n:“调 "v": "" }, { "n": "成", "v": "成熟" }, { "n": "青少年", "v": "青少年" }
     ]}]
 };
 
-const SP_FLATTENED_CATEGORIES = [
-    { "type_id": "sp_all", "type_name": "✨ SP精选推荐" },
+缺点 SP_FLATTENED_CATEGORIEs = SP_FLATTENED_CATEGORIEs = SP_FLATTENED_CATEGORIES = SP_FLATTENED_CATEGORIES = [
+    { "type_id":"sp_all",type_name":✨ SP}{ type_id:""✨"""✨ SP },"type_name{ "type_id":"sp_all","type_name":✨ SP}{ type_id:“sp_all” ""✨ SP },"type_nameSP },
     { "type_id": "sp_all_trending", "type_name": "🔥 SP精选-热门" },
     { "type_id": "sp_all_new", "type_name": "🌱 SP精选-新人" },
     { "type_id": "sp_all_status_private", "type_name": "🔒 SP精选-私播" },
